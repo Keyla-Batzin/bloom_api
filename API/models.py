@@ -1,31 +1,50 @@
 from pydantic import BaseModel
+from datetime import date, time
 from typing import List, Optional
-from datetime import datetime
 
-# Modelo Usuario
 class Usuario(BaseModel):
-    id: Optional[int] = None
-    nombre: str
-    rol: str
-    correo: str
+    id: int
+    rol: str  # 'admin' o 'cliente'
+    nombreUsuario: str
+    email: str
     contraseña: str
 
-# Modelo Producto
+    class Config:
+        orm_mode = True
+
 class Producto(BaseModel):
-    idProducto: Optional[int] = None
+    id: int
     nombre: str
-    categoria: str
     precio: float
-    imagen_url: Optional[str] = None
+    urlImagen: Optional[str] = None
+    categoria: str = 'general'
 
-# Modelo Compra
+    class Config:
+        orm_mode = True
+
 class Compra(BaseModel):
-    idCompra: Optional[int] = None
-    fechaCompra: datetime
+    id: int
     idUsuario: int
+    fecha: Optional[date] = None
+    precioTotal: float
+    hora: Optional[time] = None
 
-# Modelo CompraProducto (relación entre Compra y Producto)
+    class Config:
+        orm_mode = True
+
 class CompraProducto(BaseModel):
     idCompra: int
     idProducto: int
-    cantidad: int
+    cantidad: int = 1
+    precioUnitario: float
+
+    class Config:
+        orm_mode = True
+
+# Ejemplo de cómo podrías representar una compra con sus productos
+class CompraDetalle(BaseModel):
+    compra: Compra
+    productos: List[CompraProducto]
+
+    class Config:
+        orm_mode = True

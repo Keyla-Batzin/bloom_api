@@ -4,7 +4,7 @@ services:
   app:
     build:
      context: .
-    container_name: reservesapi
+    container_name: bloomapi
     restart: unless-stopped
     ports:
       - "8443:443"  # HTTPS

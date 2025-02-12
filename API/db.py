@@ -5,8 +5,8 @@ from mysql.connector import pooling
 db_config = {
     'host': 'mariadb',
     'user': 'root',
-    'password': 'system',
-    'database': 'bloom_bd',
+    'password': 'P@ssw0rd',
+    'database': 'bloom',
     'collation': 'utf8mb4_general_ci'
 }
 
