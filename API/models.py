@@ -48,3 +48,14 @@ class CompraDetalle(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+# Tabla Ramos Flores
+class RamosFlores(BaseModel):
+    id: int
+    nombre: str
+    precio: float
+    urlImagen: Optional[str] = None
+
+    class Config:
+        orm_mode = True

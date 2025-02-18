@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from db import get_db_connection
-from models import Usuario, Producto, Compra, CompraProducto
+from models import Producto,RamosFlores
 from datetime import date, time
 import time
 
@@ -12,50 +12,7 @@ app = FastAPI()
 def home():
     return {"message": "API COMPRAS, amb FastAPI i MariaDB sense routers"}
 
-# CRUD per a Usuaris
-@app.post("/usuarios/")
-def crear_usuario(usuario: Usuario):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            "INSERT INTO Usuarios (id, rol, nombreUsuario, email, contraseña) VALUES (%s, %s, %s, %s, %s)",
-            (usuario.id, usuario.rol, usuario.nombreUsuario, usuario.email, usuario.contraseña),
-        )
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
-    return {"message": "Usuario creado correctamente"}
-
-@app.get("/usuarios/{id}")
-def obtener_usuario(id: int):
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Usuarios WHERE id = %s", (id,))
-    usuario = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return usuario
-
-@app.get("/login/{nombreUsuario}")
-def obtener_usuario_por_nombre(nombreUsuario: str):
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, nombreUsuario, rol FROM Usuarios WHERE nombreUsuario = %s", (nombreUsuario,))    
-    usuario = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return usuario
-
-# CRUD per a Productos
+####################### CRUD Productos ###############################
 @app.post("/productos/")
 def crear_producto(producto: Producto):
     conn = get_db_connection()
@@ -133,15 +90,17 @@ def eliminar_producto(id: int):
         conn.close()
     return {"message": "Producto eliminado correctamente"}
 
-# CRUD per a Compras
-@app.post("/compras/")
-def crear_compra(compra: Compra):
+
+####################### CRUD RamosFlores ###############################
+# POST
+@app.post("/ramos_flores/")
+def crear_ramo_flores(ramo_flores: RamosFlores):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO Compras (id, idUsuario, fecha, precioTotal, hora) VALUES (%s, %s, %s, %s, %s)",
-            (compra.id, compra.idUsuario, compra.fecha, compra.precioTotal, compra.hora),
+            "INSERT INTO RamosFlores (id, nombre, precio, urlImagen) VALUES (%s, %s, %s, %s)",
+            (ramo_flores.id, ramo_flores.nombre, ramo_flores.precio, ramo_flores.urlImagen),
         )
         conn.commit()
     except Exception as e:
@@ -150,138 +109,67 @@ def crear_compra(compra: Compra):
     finally:
         cursor.close()
         conn.close()
-    return {"message": "Compra creada correctamente"}
+    return {"message": "Ramo de flores creado correctamente"}
 
-@app.get("/compras/{id}")
-def obtener_compra(id: int):
+#GET por ID
+@app.get("/ramos_flores/{id}")
+def obtener_ramo_flores(id: int):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Compras WHERE id = %s", (id,))
-    compra = cursor.fetchone()
+    cursor.execute("SELECT * FROM RamosFlores WHERE id = %s", (id,))
+    ramo_flores = cursor.fetchone()
     cursor.close()
     conn.close()
-    if not compra:
-        raise HTTPException(status_code=404, detail="Compra no encontrada")
-    return compra
+    if not ramo_flores:
+        raise HTTPException(status_code=404, detail="Ramo de flores no encontrado")
+    return ramo_flores
 
-@app.get("/compras/usuario/{idUsuario}")
-def obtener_compras_usuario(idUsuario: int):
-    time.sleep(DELAY_TIME)
+#GET all
+@app.get("/ramos_flores/")
+def obtener_todos_ramos_flores():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT Compras.*, Productos.nombre as nombreProducto FROM Compras INNER JOIN Compras_Productos ON Compras.id = Compras_Productos.idCompra INNER JOIN Productos ON Compras_Productos.idProducto = Productos.id WHERE idUsuario = %s", (idUsuario,))
-    compras = cursor.fetchall()
+    cursor.execute("SELECT * FROM RamosFlores")
+    ramos_flores = cursor.fetchall()
     cursor.close()
     conn.close()
-    return compras
+    return ramos_flores
 
-@app.put("/compras/{id}")
-def modificar_compra(id: int, compra: Compra):
+# PUT
+@app.put("/ramos_flores/{id}")
+def modificar_ramo_flores(id: int, ramo_flores: RamosFlores):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "UPDATE Compras SET idUsuario = %s, fecha = %s, precioTotal = %s, hora = %s WHERE id = %s",
-            (compra.idUsuario, compra.fecha, compra.precioTotal, compra.hora, id),
+            "UPDATE RamosFlores SET nombre = %s, precio = %s, urlImagen = %s WHERE id = %s",
+            (ramo_flores.nombre, ramo_flores.precio, ramo_flores.urlImagen, id),
         )
         conn.commit()
         if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Compra no encontrada")
+            raise HTTPException(status_code=404, detail="Ramo de flores no encontrado")
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         cursor.close()
         conn.close()
-    return {"message": "Compra actualizada correctamente"}
+    return {"message": "Ramo de flores actualizado correctamente"}
 
-@app.delete("/compras/{id}")
-def eliminar_compra(id: int):
+# DELETE
+@app.delete("/ramos_flores/{id}")
+def eliminar_ramo_flores(id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM Compras WHERE id = %s", (id,))
+        cursor.execute("DELETE FROM RamosFlores WHERE id = %s", (id,))
         conn.commit()
         if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Compra no encontrada")
+            raise HTTPException(status_code=404, detail="Ramo de flores no encontrado")
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         cursor.close()
         conn.close()
-    return {"message": "Compra eliminada correctamente"}
-
-# CRUD per a Compras_Productos
-@app.post("/compras_productos/")
-def crear_compra_producto(compra_producto: CompraProducto):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            "INSERT INTO Compras_Productos (idCompra, idProducto, cantidad, precioUnitario) VALUES (%s, %s, %s, %s)",
-            (compra_producto.idCompra, compra_producto.idProducto, compra_producto.cantidad, compra_producto.precioUnitario),
-        )
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
-    return {"message": "Compra_Producto creada correctamente"}
-
-@app.get("/compras_productos/{idCompra}/{idProducto}")
-def obtener_compra_producto(idCompra: int, idProducto: int):
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute(
-        "SELECT * FROM Compras_Productos WHERE idCompra = %s AND idProducto = %s",
-        (idCompra, idProducto),
-    )
-    compra_producto = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if not compra_producto:
-        raise HTTPException(status_code=404, detail="Compra_Producto no encontrada")
-    return compra_producto
-
-@app.put("/compras_productos/{idCompra}/{idProducto}")
-def modificar_compra_producto(idCompra: int, idProducto: int, compra_producto: CompraProducto):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            "UPDATE Compras_Productos SET cantidad = %s, precioUnitario = %s WHERE idCompra = %s AND idProducto = %s",
-            (compra_producto.cantidad, compra_producto.precioUnitario, idCompra, idProducto),
-        )
-        conn.commit()
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Compra_Producto no encontrada")
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
-    return {"message": "Compra_Producto actualizada correctamente"}
-
-@app.delete("/compras_productos/{idCompra}/{idProducto}")
-def eliminar_compra_producto(idCompra: int, idProducto: int):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            "DELETE FROM Compras_Productos WHERE idCompra = %s AND idProducto = %s",
-            (idCompra, idProducto),
-        )
-        conn.commit()
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Compra_Producto no encontrada")
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
-    return {"message": "Compra_Producto eliminada correctamente"}
+    return {"message": "Ramo de flores eliminado correctamente"}
