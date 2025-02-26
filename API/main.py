@@ -19,8 +19,8 @@ def crear_producto(producto: Producto):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO Productos (id, nombre, precio, urlImagen, categoria) VALUES (%s, %s, %s, %s, %s)",
-            (producto.id, producto.nombre, producto.precio, producto.urlImagen, producto.categoria),
+            "INSERT INTO Productos (id, nombre, precio, url, categoria) VALUES (%s, %s, %s, %s, %s)",
+            (producto.id, producto.nombre, producto.precio, producto.url, producto.categoria),
         )
         conn.commit()
     except Exception as e:
@@ -59,8 +59,8 @@ def modificar_producto(id: int, producto: Producto):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "UPDATE Productos SET nombre = %s, precio = %s, urlImagen = %s, categoria = %s WHERE id = %s",
-            (producto.nombre, producto.precio, producto.urlImagen, producto.categoria, id),
+            "UPDATE Productos SET nombre = %s, precio = %s, url = %s, categoria = %s WHERE id = %s",
+            (producto.nombre, producto.precio, producto.url, producto.categoria, id),
         )
         conn.commit()
         if cursor.rowcount == 0:
@@ -99,8 +99,8 @@ def crear_ramo_flores(ramo_flores: RamosFlores):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO RamosFlores (id, nombre, precio, urlImagen) VALUES (%s, %s, %s, %s)",
-            (ramo_flores.id, ramo_flores.nombre, ramo_flores.precio, ramo_flores.urlImagen),
+            "INSERT INTO RamosFlores (id, nombre, precio, url) VALUES (%s, %s, %s, %s)",
+            (ramo_flores.id, ramo_flores.nombre, ramo_flores.precio, ramo_flores.url),
         )
         conn.commit()
     except Exception as e:

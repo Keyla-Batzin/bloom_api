@@ -55,7 +55,7 @@ class RamosFlores(BaseModel):
     id: int
     nombre: str
     precio: float
-    urlImagen: Optional[str] = None
+    url: Optional[str] = None
 
     class Config:
         orm_mode = True
@@ -67,7 +67,7 @@ class RamosFlores(BaseModel):
 
 # Modelo para modificar URL
 class RamosFloresUpdateUrl(BaseModel):
-    urlImagen: Optional[str] = None
+    url: Optional[str] = None
 
     class Config:
         orm_mode = True
