@@ -142,8 +142,8 @@ def modificar_url_ramo_flores(id: int, ramo_flores_update: RamosFloresUpdateUrl)
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "UPDATE RamosFlores SET urlImagen = %s WHERE id = %s",
-            (ramo_flores_update.urlImagen, id),
+            "UPDATE RamosFlores SET url = %s WHERE id = %s",
+            (ramo_flores_update.url, id),
         )
         conn.commit()
         if cursor.rowcount == 0:
@@ -155,6 +155,7 @@ def modificar_url_ramo_flores(id: int, ramo_flores_update: RamosFloresUpdateUrl)
         cursor.close()
         conn.close()
     return {"message": "URL del ramo de flores actualizada correctamente"}
+
 
 # DELETE
 @app.delete("/ramos_flores/{id}")
