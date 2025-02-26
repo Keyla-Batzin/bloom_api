@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from db import get_db_connection
-from models import Producto,RamosFlores
+from models import Producto,RamosFlores, RamosFloresUpdateUrl
 from datetime import date, time
 import time
 
@@ -137,13 +137,13 @@ def obtener_todos_ramos_flores():
 
 # PUT
 @app.put("/ramos_flores/{id}")
-def modificar_ramo_flores(id: int, ramo_flores: RamosFlores):
+def modificar_url_ramo_flores(id: int, ramo_flores_update: RamosFloresUpdateUrl):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "UPDATE RamosFlores SET nombre = %s, precio = %s, urlImagen = %s WHERE id = %s",
-            (ramo_flores.nombre, ramo_flores.precio, ramo_flores.urlImagen, id),
+            "UPDATE RamosFlores SET urlImagen = %s WHERE id = %s",
+            (ramo_flores_update.urlImagen, id),
         )
         conn.commit()
         if cursor.rowcount == 0:
@@ -154,7 +154,7 @@ def modificar_ramo_flores(id: int, ramo_flores: RamosFlores):
     finally:
         cursor.close()
         conn.close()
-    return {"message": "Ramo de flores actualizado correctamente"}
+    return {"message": "URL del ramo de flores actualizada correctamente"}
 
 # DELETE
 @app.delete("/ramos_flores/{id}")

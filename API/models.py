@@ -59,3 +59,15 @@ class RamosFlores(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+###########################################################################
+# PRUEBA
+###########################################################################
+
+# Modelo para modificar URL
+class RamosFloresUpdateUrl(BaseModel):
+    urlImagen: Optional[str] = None
+
+    class Config:
+        orm_mode = True
