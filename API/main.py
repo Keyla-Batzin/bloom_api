@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from db import get_db_connection
-from models import Producto,RamosFlores, RamosFloresUpdateUrl
+from models import RamosFloresUpdateUrl, CategoriaUpdateUrl, PlantasInteriorUpdateUrl, PlantasExteriorUpdateUrl, FloresEventosUpdateUrl, MacetasAccesoriosUpdateUrl, PackUpdateUrl
 from datetime import date, time
 import time
 
@@ -12,105 +12,53 @@ app = FastAPI()
 def home():
     return {"message": "API COMPRAS, amb FastAPI i MariaDB sense routers"}
 
-####################### CRUD Productos ###############################
-@app.post("/productos/")
-def crear_producto(producto: Producto):
+####################### Categoria ###############################
+# GET por ID
+@app.get("/categorias/{id}")
+def obtener_categoria(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Categoria WHERE id = %s", (id,))
+    categoria = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not categoria:
+        raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    return categoria
+
+# GET all
+@app.get("/categorias/")
+def obtener_todas_categorias():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Categoria")
+    categorias = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return categorias
+
+# PUT (Modificar URL)
+@app.put("/categorias/{id}")
+def modificar_url_categoria(id: int, categoria_update: CategoriaUpdateUrl):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO Productos (id, nombre, precio, url, categoria) VALUES (%s, %s, %s, %s, %s)",
-            (producto.id, producto.nombre, producto.precio, producto.url, producto.categoria),
-        )
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
-    return {"message": "Producto creado correctamente"}
-
-@app.get("/productos/{id}")
-def obtener_producto(id: int):
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Productos WHERE id = %s", (id,))
-    producto = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    if not producto:
-        raise HTTPException(status_code=404, detail="Producto no encontrado")
-    return producto
-
-@app.get("/productos/")
-def obtener_todos_productos():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Productos")
-    productos = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return productos
-
-@app.put("/productos/{id}")
-def modificar_producto(id: int, producto: Producto):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            "UPDATE Productos SET nombre = %s, precio = %s, url = %s, categoria = %s WHERE id = %s",
-            (producto.nombre, producto.precio, producto.url, producto.categoria, id),
+            "UPDATE Categoria SET url = %s WHERE id = %s",
+            (categoria_update.url, id),
         )
         conn.commit()
         if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Producto no encontrado")
+            raise HTTPException(status_code=404, detail="Categoría no encontrada")
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         cursor.close()
         conn.close()
-    return {"message": "Producto actualizado correctamente"}
+    return {"message": "URL de la categoría actualizada correctamente"}
 
-@app.delete("/productos/{id}")
-def eliminar_producto(id: int):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("DELETE FROM Productos WHERE id = %s", (id,))
-        conn.commit()
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Producto no encontrado")
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
-    return {"message": "Producto eliminado correctamente"}
-
-
-####################### CRUD RamosFlores ###############################
-# POST
-@app.post("/ramos_flores/")
-def crear_ramo_flores(ramo_flores: RamosFlores):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            "INSERT INTO RamosFlores (id, nombre, precio, url) VALUES (%s, %s, %s, %s)",
-            (ramo_flores.id, ramo_flores.nombre, ramo_flores.precio, ramo_flores.url),
-        )
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
-    return {"message": "Ramo de flores creado correctamente"}
-
+####################### RamosFlores ###############################
 #GET por ID
 @app.get("/ramos_flores/{id}")
 def obtener_ramo_flores(id: int):
@@ -136,6 +84,7 @@ def obtener_todos_ramos_flores():
     return ramos_flores
 
 # PUT
+# Modificar la URL
 @app.put("/ramos_flores/{id}")
 def modificar_url_ramo_flores(id: int, ramo_flores_update: RamosFloresUpdateUrl):
     conn = get_db_connection()
@@ -156,21 +105,232 @@ def modificar_url_ramo_flores(id: int, ramo_flores_update: RamosFloresUpdateUrl)
         conn.close()
     return {"message": "URL del ramo de flores actualizada correctamente"}
 
+####################### PlantasInterior ###############################
+# GET por ID
+@app.get("/plantas_interior/{id}")
+def obtener_planta_interior(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM PlantasInterior WHERE id = %s", (id,))
+    planta_interior = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not planta_interior:
+        raise HTTPException(status_code=404, detail="Planta de interior no encontrada")
+    return planta_interior
 
-# DELETE
-@app.delete("/ramos_flores/{id}")
-def eliminar_ramo_flores(id: int):
+# GET all
+@app.get("/plantas_interior/")
+def obtener_todas_plantas_interior():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM PlantasInterior")
+    plantas_interior = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return plantas_interior
+
+# PUT (Modificar URL)
+@app.put("/plantas_interior/{id}")
+def modificar_url_planta_interior(id: int, planta_interior_update: PlantasInteriorUpdateUrl):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM RamosFlores WHERE id = %s", (id,))
+        cursor.execute(
+            "UPDATE PlantasInterior SET url = %s WHERE id = %s",
+            (planta_interior_update.url, id),
+        )
         conn.commit()
         if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Ramo de flores no encontrado")
+            raise HTTPException(status_code=404, detail="Planta de interior no encontrada")
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         cursor.close()
         conn.close()
-    return {"message": "Ramo de flores eliminado correctamente"}
+    return {"message": "URL de la planta de interior actualizada correctamente"}
+
+####################### PlantasExterior ###############################
+# GET por ID
+@app.get("/plantas_exterior/{id}")
+def obtener_planta_exterior(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM PlantasExterior WHERE id = %s", (id,))
+    planta_exterior = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not planta_exterior:
+        raise HTTPException(status_code=404, detail="Planta de exterior no encontrada")
+    return planta_exterior
+
+# GET all
+@app.get("/plantas_exterior/")
+def obtener_todas_plantas_exterior():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM PlantasExterior")
+    plantas_exterior = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return plantas_exterior
+
+# PUT (Modificar URL)
+@app.put("/plantas_exterior/{id}")
+def modificar_url_planta_exterior(id: int, planta_exterior_update: PlantasExteriorUpdateUrl):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE PlantasExterior SET url = %s WHERE id = %s",
+            (planta_exterior_update.url, id),
+        )
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Planta de exterior no encontrada")
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": "URL de la planta de exterior actualizada correctamente"}
+
+####################### FloresEventos ###############################
+# GET por ID
+@app.get("/flores_eventos/{id}")
+def obtener_flor_evento(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM FloresEventos WHERE id = %s", (id,))
+    flor_evento = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not flor_evento:
+        raise HTTPException(status_code=404, detail="Flor de evento no encontrada")
+    return flor_evento
+
+# GET all
+@app.get("/flores_eventos/")
+def obtener_todas_flores_eventos():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM FloresEventos")
+    flores_eventos = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return flores_eventos
+
+# PUT (Modificar URL)
+@app.put("/flores_eventos/{id}")
+def modificar_url_flor_evento(id: int, flor_evento_update: FloresEventosUpdateUrl):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE FloresEventos SET url = %s WHERE id = %s",
+            (flor_evento_update.url, id),
+        )
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Flor de evento no encontrada")
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": "URL de la flor de evento actualizada correctamente"}
+
+####################### MacetasAccesorios ###############################
+# GET por ID
+@app.get("/macetas_accesorios/{id}")
+def obtener_maceta_accesorio(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM MacetasAccesorios WHERE id = %s", (id,))
+    maceta_accesorio = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not maceta_accesorio:
+        raise HTTPException(status_code=404, detail="Maceta o accesorio no encontrado")
+    return maceta_accesorio
+
+# GET all
+@app.get("/macetas_accesorios/")
+def obtener_todas_macetas_accesorios():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM MacetasAccesorios")
+    macetas_accesorios = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return macetas_accesorios
+
+# PUT (Modificar URL)
+@app.put("/macetas_accesorios/{id}")
+def modificar_url_maceta_accesorio(id: int, maceta_accesorio_update: MacetasAccesoriosUpdateUrl):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE MacetasAccesorios SET url = %s WHERE id = %s",
+            (maceta_accesorio_update.url, id),
+        )
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Maceta o accesorio no encontrado")
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": "URL de la maceta o accesorio actualizada correctamente"}
+
+####################### Pack ###############################
+# GET por ID
+@app.get("/packs/{id}")
+def obtener_pack(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Pack WHERE id = %s", (id,))
+    pack = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if not pack:
+        raise HTTPException(status_code=404, detail="Pack no encontrado")
+    return pack
+
+# GET all
+@app.get("/packs/")
+def obtener_todos_packs():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Pack")
+    packs = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return packs
+
+# PUT (Modificar URL)
+@app.put("/packs/{id}")
+def modificar_url_pack(id: int, pack_update: PackUpdateUrl):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE Pack SET url = %s WHERE id = %s",
+            (pack_update.url, id),
+        )
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Pack no encontrado")
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": "URL del pack actualizada correctamente"}
