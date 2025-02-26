@@ -18,7 +18,7 @@ def home():
 def obtener_categoria(id: int):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Categoria WHERE id = %s", (id,))
+    cursor.execute("SELECT * FROM Categorias WHERE id = %s", (id,))
     categoria = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -31,7 +31,7 @@ def obtener_categoria(id: int):
 def obtener_todas_categorias():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Categoria")
+    cursor.execute("SELECT * FROM Categorias")
     categorias = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -44,7 +44,7 @@ def modificar_url_categoria(id: int, categoria_update: CategoriaUpdateUrl):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "UPDATE Categoria SET url = %s WHERE id = %s",
+            "UPDATE Categorias SET url = %s WHERE id = %s",
             (categoria_update.url, id),
         )
         conn.commit()
