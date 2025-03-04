@@ -335,19 +335,23 @@ def modificar_url_pack(id: int, pack_update: PackUpdateUrl):
         conn.close()
     return {"message": "URL del pack actualizada correctamente"}
 
-####################### Categoria ###############################
-
+####################### Compra ###############################
+# Obtener todas las compras
 @app.get("/compras/")
 def obtener_todas_compras():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Compra")
-    compra = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return compra
+    try:
+        cursor.execute("SELECT * FROM Compra")
+        compras = cursor.fetchall()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return compras
 
-# Añadir un Producto
+# Añadir una Compra (un Producto)
 @app.post("/compras/")
 def crear_compra(compra: Compra):
     conn = get_db_connection()
@@ -366,3 +370,44 @@ def crear_compra(compra: Compra):
         cursor.close()
         conn.close()
     return {"message": "Ítem de compra creado correctamente", "id": cursor.lastrowid}
+
+# Eliminar una compra por ID
+@app.delete("/compras/{id}")
+def eliminar_compra(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Verificar si la compra existe
+        cursor.execute("SELECT * FROM Compra WHERE id = %s", (id,))
+        compra = cursor.fetchone()
+        if not compra:
+            raise HTTPException(status_code=404, detail="Compra no encontrada")
+
+        # Eliminar la compra
+        cursor.execute("DELETE FROM Compra WHERE id = %s", (id,))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()  # Revertir la transacción en caso de error
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": f"Compra con ID {id} eliminada correctamente"}
+
+# Obtener el precio total de todas las compras
+@app.get("/compras/precio-total")
+def obtener_precio_total():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Sumar todos los precios de las compras
+        cursor.execute("SELECT SUM(precio) AS precio_total FROM Compra")
+        resultado = cursor.fetchone()
+        precio_total = resultado["precio_total"] if resultado["precio_total"] else 0
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return {"precio_total": precio_total}
+
