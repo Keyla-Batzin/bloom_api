@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from db import get_db_connection
-from models import RamosFloresUpdateUrl, CategoriaUpdateUrl, PlantasInteriorUpdateUrl, PlantasExteriorUpdateUrl, FloresEventosUpdateUrl, MacetasAccesoriosUpdateUrl, PackUpdateUrl
+from models import RamosFloresUpdateUrl, CategoriaUpdateUrl, PlantasInteriorUpdateUrl, PlantasExteriorUpdateUrl, FloresEventosUpdateUrl, MacetasAccesoriosUpdateUrl, PackUpdateUrl, Compra
 from datetime import date, time
 import time
 
@@ -334,3 +334,24 @@ def modificar_url_pack(id: int, pack_update: PackUpdateUrl):
         cursor.close()
         conn.close()
     return {"message": "URL del pack actualizada correctamente"}
+
+####################### Categoria ###############################
+# Añadir un Producto
+@app.post("/compras/")
+def crear_compra(compra: Compra):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Insertar el nuevo ítem de compra en la base de datos
+        cursor.execute(
+            "INSERT INTO Compra (nombre, precio, url) VALUES (%s, %s, %s)",
+            (compra.nombre, compra.precio, compra.url),
+        )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()  # Revertir la transacción en caso de error
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": "Ítem de compra creado correctamente", "id": cursor.lastrowid}
