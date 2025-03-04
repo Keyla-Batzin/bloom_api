@@ -336,6 +336,17 @@ def modificar_url_pack(id: int, pack_update: PackUpdateUrl):
     return {"message": "URL del pack actualizada correctamente"}
 
 ####################### Categoria ###############################
+
+@app.get("/compras/")
+def obtener_todas_compras():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Compra")
+    compra = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return compra
+
 # Añadir un Producto
 @app.post("/compras/")
 def crear_compra(compra: Compra):
