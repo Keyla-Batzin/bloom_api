@@ -393,3 +393,26 @@ def eliminar_compra(id: int):
         cursor.close()
         conn.close()
     return {"message": f"Compra con ID {id} eliminada correctamente"}
+
+# Precio total de las compras
+@app.get("/compras/precio-total")
+def obtener_precio_total():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Query para calcular el precio total
+        query = """
+        SELECT SUM(precio * cantidad) AS total
+        FROM Compra
+        """
+        cursor.execute(query)
+        resultado = cursor.fetchone()
+
+        # Si no hay compras, el total será 0
+        precio_total = float(resultado["total"]) if resultado["total"] else 0
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return {"precio_total": precio_total}
