@@ -398,7 +398,7 @@ def eliminar_compra(id: int):
 @app.get("/compras/precio-total")
 def obtener_precio_total():
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)  # Configurar el cursor para devolver diccionarios
     try:
         # Query para calcular el precio total
         query = """
