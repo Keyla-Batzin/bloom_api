@@ -398,14 +398,15 @@ def eliminar_compra(id: int):
 @app.get("/compras/precio-total")
 def obtener_precio_total():
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)  # Configurar el cursor para devolver diccionarios
     try:
+        # Calcular el precio total multiplicando el precio por la cantidad y sumando todos los resultados
         cursor.execute("""
-            SELECT SUM(CAST(precio AS DECIMAL(10, 2)) * cantidad) AS precio_total 
+            SELECT SUM(CAST(precio AS DECIMAL(10, 2)) * cantidad AS precio_total 
             FROM Compra
         """)
-        resultado = cursor.fetchone()
-        precio_total = float(resultado["precio_total"]) if resultado["precio_total"] else 0.0
+        resultado = cursor.fetchone()  # Obtener el primer resultado
+        precio_total = int(resultado["precio_total"]) if resultado["precio_total"] else 0
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     finally:
