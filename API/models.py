@@ -28,7 +28,7 @@ class CategoriaUpdateUrl(BaseModel):
 class RamosFlores(BaseModel):
     id: int
     nombre: str
-    precio: str
+    precio: float
     url: Optional[str] = None
 
     class Config:
@@ -46,7 +46,7 @@ class RamosFloresUpdateUrl(BaseModel):
 class PlantasInterior(BaseModel):
     id: int
     nombre: str
-    precio: str
+    precio: float
     url: Optional[str] = None
 
     class Config:
@@ -64,7 +64,7 @@ class PlantasInteriorUpdateUrl(BaseModel):
 class PlantasExterior(BaseModel):
     id: int
     nombre: str
-    precio: str
+    precio: float
     url: Optional[str] = None
 
     class Config:
@@ -82,7 +82,7 @@ class PlantasExteriorUpdateUrl(BaseModel):
 class FloresEventos(BaseModel):
     id: int
     nombre: str
-    precio: str
+    precio: float
     url: Optional[str] = None
 
     class Config:
@@ -100,7 +100,7 @@ class FloresEventosUpdateUrl(BaseModel):
 class MacetasAccesorios(BaseModel):
     id: int
     nombre: str
-    precio: str
+    precio: float
     url: Optional[str] = None
 
     class Config:
@@ -118,7 +118,7 @@ class MacetasAccesoriosUpdateUrl(BaseModel):
 class Pack(BaseModel):
     id: int
     nombre: str
-    precio: str
+    precio: float
     url: Optional[str] = None
 
     class Config:
@@ -138,7 +138,8 @@ class PackUpdateUrl(BaseModel):
 class Compra(BaseModel):
     id: int
     nombre: str
-    precio: str
+    precio: float
+    cantidad: int
     url: Optional[str] = None
 
     class Config:

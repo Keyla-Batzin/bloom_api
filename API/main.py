@@ -359,8 +359,8 @@ def crear_compra(compra: Compra):
     try:
         # Insertar el nuevo ítem de compra en la base de datos
         cursor.execute(
-            "INSERT INTO Compra (nombre, precio, url) VALUES (%s, %s, %s)",
-            (compra.nombre, compra.precio, compra.url),
+            "INSERT INTO Compra (nombre, precio, url, cantidad) VALUES (%s, %s, %s, %s)",
+            (compra.nombre, compra.precio, compra.url, compra.cantidad),
         )
         conn.commit()
     except Exception as e:
@@ -393,28 +393,3 @@ def eliminar_compra(id: int):
         cursor.close()
         conn.close()
     return {"message": f"Compra con ID {id} eliminada correctamente"}
-
-# Obtener el precio total de todas las compras
-@app.get("/compras/precio-total")
-def obtener_precio_total():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        # Query para calcular el precio total
-        query = """
-        SELECT 
-            SUM(CAST(REPLACE(REPLACE(precio, '€', ''), ',', '.') AS DECIMAL(10, 2)) * cantidad) AS total
-        FROM 
-            Compra;
-        """
-        cursor.execute(query)
-        resultado = cursor.fetchone()
-
-        # Si no hay compras, el total será 0.0
-        precio_total = float(resultado["total"]) if resultado["total"] else 0.0
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        cursor.close()
-        conn.close()
-    return {"precio_total": precio_total}
