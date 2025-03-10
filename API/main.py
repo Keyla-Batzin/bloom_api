@@ -419,3 +419,72 @@ def obtener_precio_total():
         conn.close()
 
     return {"precio_total": precio_total}
+
+
+# Sumar 1 cantidad
+@app.put("/compras/sumar-cantidad/{id}")
+def sumar_cantidad(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Obtener la compra por su ID
+        cursor.execute("SELECT * FROM Compra WHERE id = %s", (id,))
+        compra = cursor.fetchone()
+
+        # Verificar si la compra existe
+        if not compra:
+            raise HTTPException(status_code=404, detail="Compra no encontrada")
+
+        # Incrementar la cantidad en 1
+        nueva_cantidad = compra["cantidad"] + 1
+
+        # Actualizar la cantidad en la base de datos
+        cursor.execute(
+            "UPDATE Compra SET cantidad = %s WHERE id = %s",
+            (nueva_cantidad, id),
+        )
+        conn.commit()
+
+        # Devolver la compra actualizada
+        compra["cantidad"] = nueva_cantidad
+        return compra
+    except Exception as e:
+        conn.rollback()  # Revertir la transacción en caso de error
+        raise HTTPException(status_code=400, detail=f"Error al sumar cantidad: {str(e)}")
+    finally:
+        cursor.close()
+        conn.close()
+        
+# Restar 1 cantidad
+@app.put("/compras/restar-cantidad/{id}")
+def restar_cantidad(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Obtener la compra por su ID
+        cursor.execute("SELECT * FROM Compra WHERE id = %s", (id,))
+        compra = cursor.fetchone()
+
+        # Verificar si la compra existe
+        if not compra:
+            raise HTTPException(status_code=404, detail="Compra no encontrada")
+
+        # Decrementar la cantidad en 1, pero no permitir valores negativos
+        nueva_cantidad = max(compra["cantidad"] - 1, 0)
+
+        # Actualizar la cantidad en la base de datos
+        cursor.execute(
+            "UPDATE Compra SET cantidad = %s WHERE id = %s",
+            (nueva_cantidad, id),
+        )
+        conn.commit()
+
+        # Devolver la compra actualizada
+        compra["cantidad"] = nueva_cantidad
+        return compra
+    except Exception as e:
+        conn.rollback()  # Revertir la transacción en caso de error
+        raise HTTPException(status_code=400, detail=f"Error al restar cantidad: {str(e)}")
+    finally:
+        cursor.close()
+        conn.close()
