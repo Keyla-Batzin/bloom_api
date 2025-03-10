@@ -402,17 +402,20 @@ def obtener_precio_total():
     try:
         # Query para calcular el precio total
         query = """
-        SELECT SUM(precio * cantidad) AS total
+        SELECT SUM(CAST(precio AS DECIMAL(10, 2)) * cantidad) AS precio_total
         FROM Compra
         """
         cursor.execute(query)
         resultado = cursor.fetchone()
 
         # Si no hay compras, el total será 0
-        precio_total = float(resultado["total"]) if resultado["total"] else 0
+        precio_total = float(resultado["precio_total"]) if resultado["precio_total"] is not None else 0.0
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        # Lanzar una excepción con un mensaje descriptivo
+        raise HTTPException(status_code=400, detail=f"Error al calcular el precio total: {str(e)}")
     finally:
+        # Cerrar el cursor y la conexión
         cursor.close()
         conn.close()
+
     return {"precio_total": precio_total}
