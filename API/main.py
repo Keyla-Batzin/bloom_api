@@ -400,10 +400,12 @@ def obtener_precio_total():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # Sumar todos los precios de las compras
-        cursor.execute("SELECT SUM(CAST(REPLACE(precio, '€', '') AS DECIMAL(10, 2))) AS precio_total FROM Compra")
+        cursor.execute("""
+            SELECT SUM(CAST(precio AS DECIMAL(10, 2)) * cantidad) AS precio_total 
+            FROM Compra
+        """)
         resultado = cursor.fetchone()
-        precio_total = int(resultado["precio_total"]) if resultado["precio_total"] else 0
+        precio_total = float(resultado["precio_total"]) if resultado["precio_total"] else 0.0
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     finally:
