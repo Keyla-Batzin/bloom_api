@@ -422,8 +422,8 @@ def obtener_precio_total():
 
 
 # Sumar 1 cantidad
-@app.put("/compras/sumar-cantidad/{id}")
-def sumar_cantidad(id: int):
+@app.put("/compras/suma-cantidad/{id}")
+def suma_cantidad(id: int):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
@@ -456,8 +456,8 @@ def sumar_cantidad(id: int):
         conn.close()
         
 # Restar 1 cantidad
-@app.put("/compras/restar-cantidad/{id}")
-def restar_cantidad(id: int):
+@app.put("/compras/resta-cantidad/{id}")
+def resta_cantidad(id: int):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
