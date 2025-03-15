@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException,Query
 from db import get_db_connection
-from models import RamosFloresUpdateUrl, CategoriaUpdateUrl, PlantasInteriorUpdateUrl, PlantasExteriorUpdateUrl, FloresEventosUpdateUrl, MacetasAccesoriosUpdateUrl, PackUpdateUrl, Compra
+from models import RamosFloresUpdateUrl, CategoriaUpdateUrl, PlantasInteriorUpdateUrl, PlantasExteriorUpdateUrl, FloresEventosUpdateUrl, MacetasAccesoriosUpdateUrl, PackUpdateUrl, Compra, Producto, Favorito
 from datetime import date, time
 import time
 
@@ -351,7 +351,7 @@ def obtener_todas_compras():
         conn.close()
     return compras
 
-# Añadir una Compra (un Producto)
+# Añadir a la tabla Compra
 @app.post("/compras/")
 def crear_compra(compra: Compra):
     conn = get_db_connection()
@@ -420,7 +420,6 @@ def obtener_precio_total():
 
     return {"precio_total": precio_total}
 
-
 # Sumar 1 cantidad
 @app.put("/compras/suma-cantidad/{id}")
 def suma_cantidad(id: int):
@@ -488,3 +487,80 @@ def resta_cantidad(id: int):
     finally:
         cursor.close()
         conn.close()
+        
+####################### Productos ###############################
+# Busqueda de Search
+@app.get("/productos/")
+def buscar_productos(nombre: str):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Query para buscar productos que coincidan con el nombre (insensible a mayúsculas/minúsculas)
+        query = "SELECT * FROM Productos WHERE LOWER(nombre) LIKE LOWER(%s)"
+        cursor.execute(query, (f"%{nombre}%",))  # Usamos % para búsqueda parcial
+        productos = cursor.fetchall()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return productos
+
+####################### Favoritos ###############################
+# Obtener todos los favoritos
+@app.get("/favoritos/")
+def obtener_todas_favoritos():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT * FROM Compra")
+        compras = cursor.fetchall()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return compras
+
+# Añadir a la tabla Compra
+@app.post("/compras/")
+def crear_compra(compra: Compra):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Insertar el nuevo ítem de compra en la base de datos
+        cursor.execute(
+            "INSERT INTO Compra (nombre, precio, url, cantidad) VALUES (%s, %s, %s, %s)",
+            (compra.nombre, compra.precio, compra.url, compra.cantidad),
+        )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()  # Revertir la transacción en caso de error
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": "Ítem de compra creado correctamente", "id": cursor.lastrowid}
+
+# Eliminar una compra por ID
+@app.delete("/compras/{id}")
+def eliminar_compra(id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Verificar si la compra existe
+        cursor.execute("SELECT * FROM Compra WHERE id = %s", (id,))
+        compra = cursor.fetchone()
+        if not compra:
+            raise HTTPException(status_code=404, detail="Compra no encontrada")
+
+        # Eliminar la compra
+        cursor.execute("DELETE FROM Compra WHERE id = %s", (id,))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()  # Revertir la transacción en caso de error
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": f"Compra con ID {id} eliminada correctamente"}

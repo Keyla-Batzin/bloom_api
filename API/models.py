@@ -134,12 +134,31 @@ class PackUpdateUrl(BaseModel):
 ###########################################################################
 # OTROS MODELOS
 ###########################################################################
-
+### Compra
 class Compra(BaseModel):
     id: int
     nombre: str
     precio: float
     cantidad: int
+    url: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+### Productos
+class Producto(BaseModel):
+    id: int
+    nombre: str
+    precio: float
+    url: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+class Favorito(BaseModel):
+    id: int
+    nombre: str
+    precio: float
     url: Optional[str] = None
 
     class Config:
