@@ -509,58 +509,58 @@ def buscar_productos(nombre: str):
 ####################### Favoritos ###############################
 # Obtener todos los favoritos
 @app.get("/favoritos/")
-def obtener_todas_favoritos():
+def obtener_todos_favoritos():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT * FROM Compra")
-        compras = cursor.fetchall()
+        cursor.execute("SELECT * FROM Favoritos")
+        favoritos = cursor.fetchall()
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Error al obtener favoritos: {str(e)}")
     finally:
         cursor.close()
         conn.close()
-    return compras
+    return favoritos
 
-# Añadir a la tabla Compra
-@app.post("/compras/")
-def crear_compra(compra: Compra):
+# Añadir a la tabla Favoritos
+@app.post("/favoritos/")
+def crear_favorito(favorito: Favorito):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # Insertar el nuevo ítem de compra en la base de datos
+        # Insertar el nuevo ítem de favorito en la base de datos
         cursor.execute(
-            "INSERT INTO Compra (nombre, precio, url, cantidad) VALUES (%s, %s, %s, %s)",
-            (compra.nombre, compra.precio, compra.url, compra.cantidad),
+            "INSERT INTO Favoritos (nombre, precio, url) VALUES (%s, %s, %s)",
+            (favorito.nombre, favorito.precio, favorito.url),
         )
         conn.commit()
     except Exception as e:
         conn.rollback()  # Revertir la transacción en caso de error
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Error al crear favorito: {str(e)}")
     finally:
         cursor.close()
         conn.close()
-    return {"message": "Ítem de compra creado correctamente", "id": cursor.lastrowid}
+    return {"message": "Ítem de favorito creado correctamente", "id": cursor.lastrowid}
 
-# Eliminar una compra por ID
-@app.delete("/compras/{id}")
-def eliminar_compra(id: int):
+# Eliminar una favorito por ID
+@app.delete("/favoritos/{id}")
+def eliminar_favorito(id: int):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # Verificar si la compra existe
-        cursor.execute("SELECT * FROM Compra WHERE id = %s", (id,))
-        compra = cursor.fetchone()
-        if not compra:
-            raise HTTPException(status_code=404, detail="Compra no encontrada")
+        # Verificar si el favorito existe
+        cursor.execute("SELECT * FROM Favoritos WHERE id = %s", (id,))
+        favorito = cursor.fetchone()
+        if not favorito:
+            raise HTTPException(status_code=404, detail="Favorito no encontrado")
 
-        # Eliminar la compra
-        cursor.execute("DELETE FROM Compra WHERE id = %s", (id,))
+        # Eliminar el favorito
+        cursor.execute("DELETE FROM Favoritos WHERE id = %s", (id,))
         conn.commit()
     except Exception as e:
         conn.rollback()  # Revertir la transacción en caso de error
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Error al eliminar favorito: {str(e)}")
     finally:
         cursor.close()
         conn.close()
-    return {"message": f"Compra con ID {id} eliminada correctamente"}
+    return {"message": f"Favorito con ID {id} eliminado correctamente"}
